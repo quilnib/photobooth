@@ -16,6 +16,11 @@ import custom
 import Image
 import config
 from constants import *
+import RPi.GPIO as io
+io.setmode(io.BCM)
+
+button_pin = 24
+io.setup(button_pin, io.IN, pull_up_down=io.PUD_DOWN)
 
 ## This is a simple GUI, so we allow the root singleton to do the legwork
 root = Tk()
@@ -136,7 +141,7 @@ def check_and_snap(force=False, countdown1=None):
     force -- take a snapshot regarless of button status
     countdown1 -- starting value for countdown timer
     '''
-    global  image_tk, Button_enabled, last_snap, signed_in
+    global  image_tk, Button_enabled, last_snap, signed_in, button_pin
     
     if countdown1 is None:
         countdown1 = custom.countdown1
@@ -151,11 +156,14 @@ def check_and_snap(force=False, countdown1=None):
         ## ser.write('e') #enable button (not used)
         Button_enabled = True
         # can.delete("text")
-        # can.create_text(WIDTH/2, HEIGHT - STATUS_H_OFFSET, text="Press button when ready", font=custom.CANVAS_FONT, tags="text")
+        can.create_text(WIDTH/2, HEIGHT - STATUS_H_OFFSET, text="Find your photos at bit.ly/449halloween", font=custom.CANVAS_FONT, tags="text", fill="white")
         # can.update()
         
     ## get command string from alamode
 #    command = ser.readline().strip()
+
+    if io.input(button_pin):
+        print("button was pressed")
     command=""
     if Button_enabled and (force or command == "snap" or timelapse_due()):
         ## take a photo and display it
@@ -175,7 +183,7 @@ def check_and_snap(force=False, countdown1=None):
             last_snap = time.time()
             display_image(im)
             can.delete("text")
-            can.create_text(WIDTH/2, HEIGHT - STATUS_H_OFFSET, text="Uploading Image", font=custom.CANVAS_FONT, tags="text")
+            can.create_text(WIDTH/2, HEIGHT - STATUS_H_OFFSET, text="Uploading Image", font=custom.CANVAS_FONT, tags="text", fill="white")
             can.update()
             if signed_in:
                 if custom.albumID == 'None':
@@ -250,7 +258,7 @@ def sendPic(*args):
             can.delete("all")
             im = Image.open(custom.PROC_FILENAME)
             display_image(im)
-            can.create_text(WIDTH/2, HEIGHT - STATUS_H_OFFSET, text="Press button when ready", font=custom.CANVAS_FONT, tags="text")
+            can.create_text(WIDTH/2, HEIGHT - STATUS_H_OFFSET, text="Press button when ready", font=custom.CANVAS_FONT, tags="text", fill="white")
             can.update()
     else:
         print 'Not signed in'
@@ -303,7 +311,7 @@ else:
 timelapse_label.pack(side=LEFT)
 
 ## add a text entry box for email addresses
-etext = Entry(frame,width=40, textvariable=email_addr, font=custom.BUTTON_FONT)
+etext = Entry(frame,width=40, textvariable=email_addr, font=custom.BUTTON_FONT)#change width back to 40 to use again
 etext.pack()
 frame.pack()
 etext.bind('<Button-1>', launch_tkkb)
@@ -319,15 +327,19 @@ def labeled_slider(parent, label, from_, to, side, variable):
 interface_frame = Frame(root)
 
 snap_button = Button(interface_frame, text="snap", command=force_snap, font=custom.BUTTON_FONT)
-# snap_button.pack(side=RIGHT) ## moved to canvas
+#snap_button.pack(side=RIGHT) ## moved to canvas
 interface_frame.pack(side=RIGHT)
 
 ## the canvas will display the images
-can = Canvas(root, width=WIDTH, height=HEIGHT)
+can = Canvas(root, width=WIDTH, height=HEIGHT, background="black")
 can.pack()
 def snap_callback(*args):
     force_snap()
 can.bind('<Button-1>', snap_callback)
+
+def photoFromPress(channel):
+    force_snap()
+io.add_event_detect(button_pin, io.RISING, callback=photoFromPress, bouncetime=300)
 
 ## sign in to google?
 if custom.SIGN_ME_IN:
@@ -340,7 +352,7 @@ if not signed_in:
 
 ### take the first photo (no delay)
 can.delete("text")
-can.create_text(WIDTH/2, HEIGHT/2, text="SMILE ;-)", font=custom.CANVAS_FONT, tags="splash")
+can.create_text(WIDTH/2, HEIGHT/2, text="Happy Halloween!", font=custom.CANVAS_FONT, tags="splash", fill="white")
 can.update()
 force_snap(countdown1=0)
 

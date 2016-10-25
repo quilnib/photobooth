@@ -73,7 +73,7 @@ restore_conf()
 
 ### set up GUI
 BUTTON_FONT = ('Times', 24)
-CANVAS_FONT = ("times", 50)
+CANVAS_FONT = ("times", 30)
 
 ## usually not need to change these.
 EXT = 'jpg'     

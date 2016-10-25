@@ -76,7 +76,7 @@ def countdown(camera, can, countdown1):
     for i in range(countdown1):
         can.delete("text")
         can.update()
-        can.create_text(SCREEN_W/2 - 0, 200, text=str(countdown1 - i), font=font, tags="text")
+        can.create_text(SCREEN_W/2 - 0, 200, text=str(countdown1 - i), font=font, tags="text", fill="white")
         can.update()
         if i < countdown1 - 2:
             time.sleep(1)
@@ -96,6 +96,10 @@ def setLights(r, g, b):
     rgb_command = 'c%s%s%s' % (chr(r), chr(g), chr(b))
 #    ser.write(rgb_command)
 
+def activateFlash():
+    #TODO add the code which with activate the relay switch for the lights
+    print("flash was called")
+
 def snap(can, countdown1, effect='None'):
     global image_idx
 
@@ -109,6 +113,8 @@ def snap(can, countdown1, effect='None'):
         camera = mycamera.PiCamera()
         countdown(camera, can, countdown1)
         if effect == 'None':
+            activateFlash()
+            print("the Snap function was called")
             camera.capture(custom.RAW_FILENAME, resize=(1366, 768))
             snapshot = Image.open(custom.RAW_FILENAME)
         elif effect == 'Warhol': 
