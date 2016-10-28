@@ -27,7 +27,14 @@ import config
 import custom
 import httplib2
 
+#import RPi.GPIO as io
+#io.setmode(io.BCM)
+
 from constants import SCREEN_W, SCREEN_H, WHITE, BLACK
+
+#relay_pin = 17
+#io.setup(relay_pin, io.OUT)
+#io.output(relay_pin, True)
 
 FONTSIZE=100
 font = ('Times', FONTSIZE)
@@ -66,6 +73,7 @@ def countdown(camera, can, countdown1):
     #                      hflip=True)
     can.delete("image")
     led_state = False
+    activateFlash()
     safe_set_led(camera, led_state)
     camera.preview_alpha = 100
     camera.preview_window = (0, 0, SCREEN_W, SCREEN_H)
@@ -99,6 +107,11 @@ def setLights(r, g, b):
 def activateFlash():
     #TODO add the code which with activate the relay switch for the lights
     print("flash was called")
+    #io.output(relay_pin, False)
+
+def deactivateFlash():
+    print("turning off flash")
+    #io.output(relay_pin, True)
 
 def snap(can, countdown1, effect='None'):
     global image_idx
@@ -113,7 +126,7 @@ def snap(can, countdown1, effect='None'):
         camera = mycamera.PiCamera()
         countdown(camera, can, countdown1)
         if effect == 'None':
-            activateFlash()
+            #activateFlash()
             print("the Snap function was called")
             camera.capture(custom.RAW_FILENAME, resize=(1366, 768))
             snapshot = Image.open(custom.RAW_FILENAME)
@@ -168,6 +181,7 @@ def snap(can, countdown1, effect='None'):
     except Exception, e:
         print e
         snapshot = None
+    deactivateFlash()
     return snapshot
 snap.active = False
 
