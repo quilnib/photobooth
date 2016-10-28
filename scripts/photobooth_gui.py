@@ -19,8 +19,12 @@ from constants import *
 import RPi.GPIO as io
 io.setmode(io.BCM)
 
+relay_pin = 17
 button_pin = 24
 io.setup(button_pin, io.IN, pull_up_down=io.PUD_DOWN)
+#io.setup(relay_pin, io.OUT)
+#io.output(relay_pin, True)
+
 
 ## This is a simple GUI, so we allow the root singleton to do the legwork
 root = Tk()
@@ -331,7 +335,7 @@ snap_button = Button(interface_frame, text="snap", command=force_snap, font=cust
 interface_frame.pack(side=RIGHT)
 
 ## the canvas will display the images
-can = Canvas(root, width=WIDTH, height=HEIGHT, background="black")
+can = Canvas(root, width=WIDTH, height=HEIGHT) #add back in for black background, background="black")
 can.pack()
 def snap_callback(*args):
     force_snap()
